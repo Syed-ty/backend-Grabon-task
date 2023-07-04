@@ -2,17 +2,17 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const prodctSchema = new Schema({
-   name:{
-    type:String
-   },
-   comment:{
-    type:String
-   },
    id:{
+    type:Number
+   },
+   userId:{
+    type:Number
+   },
+   title:{
     type:String
    },
-   CurrentDate:{
-    type:Date
+   body:{
+    type:String
    }
 })
 

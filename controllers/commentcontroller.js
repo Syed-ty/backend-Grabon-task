@@ -1,14 +1,14 @@
 const {comments} = require('../Models/commentmodel')
 
 
-const getAllComments = async(req,res,next)=>{
+const getAll = async(req,res,next)=>{
     try{
-        const getcommentDetails = await comments.find({})
-        if(getcommentDetails){
+        const jsonDatas =  await require('../data.json');
+        if(jsonDatas){
             res.status(200).json({
                 err:false,
                 message:"Successfully fetced the data",
-                response:getcommentDetails
+                response:jsonDatas
             })
         }
         else{
@@ -24,24 +24,22 @@ const getAllComments = async(req,res,next)=>{
 }
 
 
-const addComments = async(req,res,next)=>{
+const add = async(req,res,next)=>{
     try{
         const{
-            name,
-            comment,
             id,
+            userId,
+            title,
+            body
         } = req.body
-        const addCommentDetails = await comments.create({
-            name :name,
-            comment :comment,
-            CurrentDate :new Date(),
-            id :id
-        })
-        if(addCommentDetails){
+        const jsonDatas =  await require('../data.json');
+        jsonDatas.push(req.body)
+        const addDetails = jsonDatas
+        if(addDetails){
             res.send({
                 err:false,
-                message:"Comment are  added  successfully",
-                response:addCommentDetails
+                message:"Added successfully",
+                response:addDetails
             })
         }
         else{
@@ -56,30 +54,27 @@ const addComments = async(req,res,next)=>{
     }
 }
 
-
-const updateCommentDetails = async (req, res, next) => {
+const updateDetails = async (req, res, next) => {
     try {
         const{
-            name,
-            comment,
             id,
+            userId,
+            title,
+            body
         } = req.body
-
-        const updateData = await comments.findOneAndUpdate({
-            id: req.params.id
-        }, {
-            name :name,
-            comment :comment,
-            CurrentDate :new Date(),
-            id :id
-        }, {
-            new: true
-        });
-        if (updateData) {
+        var jsonDatas =  await require('../data.json');
+        jsonDatas.forEach((ele,i) => {
+            if (ele.id === parseInt(req.params.id)) {
+                jsonDatas.splice(i, 1);
+            }
+          })
+          jsonDatas.push(req.body)
+          
+        if (jsonDatas) {
             res.status(200).json({
                 error: false,
-                message: "commentDetails are Updated Successfully",
-                response: updateData
+                message: "Updated Successfully",
+                response: jsonDatas
             })
         } else {
             res.status(200).json({
@@ -93,32 +88,37 @@ const updateCommentDetails = async (req, res, next) => {
 };
 
 
-const sortingDetails = async(req,res,next)=>{
-    try{
-        const getAllDetails = await comments.find({})
-        getAllDetails.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1: -1);
-        if(getAllDetails){
+const deleteApi = async (req, res, next) => {
+    try {
+        const{
+            id
+        } = req.body
+        const jsonDatas =  await require('../data.json');
+        jsonDatas.forEach((ele,i) => {
+            if (ele.id === req.body.id) {
+                jsonDatas.splice(i, 1);
+            }
+          })
+        if (jsonDatas) {
             res.status(200).json({
-                err:false,
-                message:"Successfully fetced the data",
-                response:getAllDetails
+                error: false,
+                message: 'Deleted Successfully',
+                response: jsonDatas
+            })
+        } else {
+            res.status(400).json({
+                error: true,
+                message: 'Something Went Wrong'
             })
         }
-        else{
-            res.status(404).json({
-                err:true,
-                message:"No data found"
-            })
-        }
-    }
-    catch(err){
-         next(err.message)
+    } catch (error) {
+        next(error)
     }
 }
 
 module.exports = {
-    getAllComments,
-    addComments,
-    updateCommentDetails,
-    sortingDetails
+    getAll,
+    add,
+    updateDetails,
+    deleteApi
 }
